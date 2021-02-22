@@ -17,15 +17,16 @@ class DBPool {
     };
 
     db_exist_or_create() {
-        let sql = `SHOW TABLES LIKE '${process.env.DB_db}';`
+        let sql = `SHOW DATABASES LIKE '${process.env.DB_db}';`
         this.pool.query(sql, (err, res) => {
             if (err) {
                 console.log('Show tables error');
             } else {
                 if (res.length !== 0) {
-                    console.log('Database exist!')
+                    console.log(`Database ${process.env.DB_db} exist!`);
                 } else {
-                    console.log('Default database creating...')
+                    console.log(res);
+                    console.log('Default database creating...');
                     this.db_default_init();
                 }
             }
@@ -33,7 +34,6 @@ class DBPool {
     };
 
     db_default_init() {
-        // const creates = fs.readFileSync(path.join(__dirname, 'create_db.sql')).toString();
         const creates = fs.readFileSync(path.join(__dirname, 'create_db.sql')).toString();
         console.log(creates);
         const query = this.pool.execute(creates, (err, result) => {
@@ -42,7 +42,6 @@ class DBPool {
             } else {
                 console.log('Query run successfully')
             }
-
         });
     };
 }
