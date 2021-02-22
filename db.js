@@ -17,7 +17,7 @@ class DBPool {
     };
 
     db_exist_or_create() {
-        let sql = `SHOW DATABASES LIKE '${process.env.DB_db}';`
+        let sql = `SHOW TABLES FROM '${process.env.DB_db}';`
         this.pool.query(sql, (err, res) => {
             if (err) {
                 console.log('Show tables error');
