@@ -1,4 +1,4 @@
-const env = require("dotenv").config();
+require("dotenv").config();
 const mysql = require("mysql2");
 const fs = require("fs");
 const path = require('path');
@@ -34,9 +34,9 @@ class DBPool {
     };
 
     db_default_init() {
-        const creates = fs.readFileSync(path.join(__dirname, 'create_db.sql')).toString();
+        let creates = fs.readFileSync(path.join(__dirname, 'create_db.sql')).toString();
         console.log(creates);
-        const query = this.pool.execute(creates, (err, result) => {
+        this.pool.execute(creates, (err, result) => {
             if (err) {
                 throw err;
             } else {
@@ -46,4 +46,4 @@ class DBPool {
     };
 }
 
-db = new DBPool();
+module.exports.DBPool = DBPool;
