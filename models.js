@@ -1,4 +1,5 @@
 const dbModule = require('./db');
+const moment = require('moment')
 
 const db = new dbModule.DBPool();
 
@@ -23,7 +24,7 @@ class Book {
         });
     };
 
-    get_book(id ,callback) {
+    get_book(id, callback) {
         let sql = 'SELECT * FROM library.books WHERE id = ?';
         db.pool.query(sql, [id], (err, res) => {
             if (err) {
@@ -33,6 +34,20 @@ class Book {
                 callback(null, res)
             }
         });
+    };
+
+    create_book(body, callback) {
+        let sql = 'INSERT INTO library.books(title, author_id, description, date,  image) VALUES (?, ?, ?, ?, ?);';
+        let sql_args = [body.title, body.author_id, body.description, moment().format(), body.image ];
+        db.pool.query(sql, sql_args, (err, res) => {
+            if (err) {
+                callback(err, null);
+            } else {
+                console.log(`query [${sql}] successfully`)
+                callback(null, res)
+            }
+        });
+
     };
 }
 

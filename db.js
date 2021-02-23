@@ -13,6 +13,7 @@ class DBPool {
             database: process.env.DB_db,
             password: process.env.DB_PASS,
         });
+
         this.db_exist_or_create();
     };
 
