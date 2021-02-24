@@ -12,9 +12,22 @@ class Book {
         this.image = image;
     }
 
+    create_book(body, callback) {
+        let sql = 'INSERT INTO library.books(title, author_id, description, date,  image) VALUES (?, ?, ?, ?, ?);';
+        let sql_args = [body.title, body.author_id, body.description, moment().format(), body.image];
+        db.pool.query(sql, sql_args, (err, res) => {
+            if (err) {
+                callback(err, null);
+            } else {
+                console.log(`query [${sql}] successfully`)
+                callback(null, res)
+            }
+        });
+    };
+
     get_all(callback) {
         let sql = 'SELECT * FROM library.books';
-        let result = db.pool.query(sql, (err, res) => {
+        db.pool.query(sql, (err, res) => {
             if (err) {
                 callback(err, null);
             } else {
@@ -36,19 +49,69 @@ class Book {
         });
     };
 
-    create_book(body, callback) {
-        let sql = 'INSERT INTO library.books(title, author_id, description, date,  image) VALUES (?, ?, ?, ?, ?);';
-        let sql_args = [body.title, body.author_id, body.description, moment().format(), body.image ];
-        db.pool.query(sql, sql_args, (err, res) => {
-            if (err) {
-                callback(err, null);
-            } else {
-                console.log(`query [${sql}] successfully`)
-                callback(null, res)
-            }
-        });
+    get_by(body, callback) {
+        console.log('sql reading...');
+        console.log(body);
+        let argsForQuery = []
+        if (body === undefined) {
+            let default_sql = 'SELECT * FROM library.books ORDER BY books.id';
+            db.pool.query(default_sql, (err, res) => {
+                if (err) {
+                    callback(err, null);
+                } else {
+                    console.log(`query [${sql}] successfully`);
+                    callback(null, res);
+                }
+            });
+        } else {
+            let building_sql = 'SELECT * FROM library.books';
 
-    };
+            if (body.sort_field) {
+                let sortField = body.sort_field;
+                building_sql += ' ORDER BY ' + sortField;
+            }
+
+            if (body.sort_type) {
+                let sortType = body.sort_type.toUpperCase();
+                building_sql += ' ' + sortType;
+            }
+
+            if (body.limit && body.page && body.offset) {
+                let offset = Number(Number(body.offset) + Number(body.limit * (body.page - 1)));
+                let limit = Number(body.limit);
+                argsForQuery.push(offset, limit);
+                building_sql += ' LIMIT ?, ?';
+
+            } else if(body.limit && body.offset){
+                let offset = Number(body.offset);
+                let limit = Number(body.limit);
+                argsForQuery.push(offset, limit);
+                building_sql += ' LIMIT ?, ?';
+
+            } else if (body.limit && body.page) {
+                let limit = Number(body.limit);
+                let offset = Number(limit * (body.page - 1));
+                argsForQuery.push(offset, limit);
+                building_sql += ' LIMIT ?, ?';
+
+            } else if (body.limit) {
+                let limit = Number(body.limit);
+                argsForQuery.push(limit);
+                building_sql += ' LIMIT ?';
+            }
+            let sql = building_sql + ';';
+            console.log(sql);
+            console.log(argsForQuery);
+            db.pool.query(sql, argsForQuery, (err, res) => {
+                if (err) {
+                    callback(err, null);
+                } else {
+                    console.log(`query [${sql}] successfully`);
+                    callback(null, res);
+                }
+            });
+        }
+    }
 }
 
 module.exports.Book = Book;
