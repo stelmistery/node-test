@@ -25,7 +25,6 @@ bookApi.get('/books', function (request, response) {
     let b = new models.Book();
     b.get_all((err, res) => {
         if (err) {
-            console.log(err);
             throw err;
         }
         response.send(res);
@@ -47,7 +46,6 @@ bookApi.get('/book/:id', function (request, response) {
     let b = new models.Book();
     b.get_book(Number(request.params.id), (err, res) => {
         if (err) {
-            console.log(err);
             throw err
         }
         response.send(res);
@@ -60,7 +58,6 @@ bookApi.post('/book/create', jsonParser, function (request, response) {
             let b = new models.Book();
             b.create_book(request.body[0], (err, res) => {
                 if (err) {
-                    console.log(err);
                     throw err
                 }
                 response.send(res);
@@ -81,7 +78,6 @@ bookApi.put('/book/update/:id', jsonParser, function (request, response) {
             let b = new models.Book();
             b.book_update(request.params.id, request.body[0], (err, res) => {
                 if (err) {
-                    console.log(err);
                     throw err
                 }
                 response.send(res);
@@ -90,6 +86,18 @@ bookApi.put('/book/update/:id', jsonParser, function (request, response) {
     }
 })
 
+bookApi.delete('/book/delete/:id', (request, response) => {
+    let id = request.params.id;
+    if (typeof id !== "number") {
+        let b = new models.Book();
+        b.book_delete(id, (err, res) => {
+            if (err) {
+                throw err
+            }
+            response.send(res);
+        });
+    }
+});
 
 app.listen(3000, () => {
     console.log('Сервер слушает...')

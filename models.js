@@ -32,7 +32,7 @@ class Book {
                 callback(err, null);
             } else {
                 console.log(`query [${sql}] successfully`)
-                callback(null, res)
+                callback(null, res);
             }
         });
     };
@@ -44,7 +44,7 @@ class Book {
                 callback(err, null);
             } else {
                 console.log(`query [${sql}] successfully`)
-                callback(null, res)
+                callback(null, res);
             }
         });
     };
@@ -138,6 +138,18 @@ class Book {
                     callback(null, res);
                 }
             });
+        });
+    }
+
+    book_delete(id, callback) {
+        let sql = 'DELETE FROM library.books WHERE id = ?';
+        db.pool.query(sql, [id], (err, res) => {
+            if (err) {
+                callback(err, null);
+            } else {
+                console.log(`query [${sql}] successfully`);
+                callback(null, res);
+            }
         });
     }
 }
