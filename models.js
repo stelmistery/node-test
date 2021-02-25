@@ -50,8 +50,6 @@ class Book {
     };
 
     get_by(body, callback) {
-        console.log('sql reading...');
-        console.log(body);
         let argsForQuery = []
         if (body === undefined) {
             let default_sql = 'SELECT * FROM library.books ORDER BY books.id';
@@ -82,7 +80,7 @@ class Book {
                 argsForQuery.push(offset, limit);
                 building_sql += ' LIMIT ?, ?';
 
-            } else if(body.limit && body.offset){
+            } else if (body.limit && body.offset) {
                 let offset = Number(body.offset);
                 let limit = Number(body.limit);
                 argsForQuery.push(offset, limit);
@@ -111,6 +109,36 @@ class Book {
                 }
             });
         }
+    }
+
+    book_update(id, newBody, callback) {
+        let sql = 'SELECT * FROM library.books WHERE id = ?';
+        const p = new Promise((resolve, reject) => {
+            db.pool.query(sql, [id], (err, res) => {
+                if (err) {
+                    callback(err, null);
+                } else {
+                    console.log(`query [${sql}] successfully`);
+                    resolve(res[0]);
+                }
+            });
+        }).then((book_data_db) => {
+            let sql = 'UPDATE library.books SET title = ?, author_id = ?, description = ?, image = ? WHERE id = ?';
+            let sqlArgs = [];
+            let title = (newBody.title) ? newBody.title : book_data_db.title;
+            let author_id = (newBody.author_id) ? newBody.author_id : book_data_db.author_id;
+            let description = (newBody.description) ? newBody.description : book_data_db.description;
+            let image = (newBody.image) ? newBody.image : book_data_db.image;
+            sqlArgs.push(title, author_id, description, image, id);
+            db.pool.query(sql, sqlArgs, (err, res) => {
+                if (err) {
+                    callback(err, null);
+                } else {
+                    console.log(`query [${sql}] successfully`);
+                    callback(null, res);
+                }
+            });
+        });
     }
 }
 
