@@ -11,17 +11,19 @@ var options = {
 const app = express();
 const jsonParser = express.json();
 const bookApi = express.Router();
+const fileApi = express.Router();
 
 // app.use(express.static(__dirname + "/public"));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(null, options));
-app.use("/api", bookApi);
+app.use("/api/file", fileApi);
+app.use("/api/book", bookApi);
 
 app.get('/', function (request, response) {
     response.set('Content-Type', 'text/html');
     response.send('<h1>Hop hey lalaley</h1>');
 })
 
-bookApi.get('/books', function (request, response) {
+bookApi.get('/all', function (request, response) {
     let b = new models.Book();
     b.get_all((err, res) => {
         if (err) {
@@ -31,7 +33,7 @@ bookApi.get('/books', function (request, response) {
     });
 });
 
-bookApi.get('/book/get_by', jsonParser, function (request, response) {
+bookApi.get('/get_by', jsonParser, function (request, response) {
     let b = new models.Book();
     b.get_by(request.query, (err, res) => {
         if (err) {
@@ -42,7 +44,7 @@ bookApi.get('/book/get_by', jsonParser, function (request, response) {
     });
 });
 
-bookApi.get('/book/:id', function (request, response) {
+bookApi.get('/:id', function (request, response) {
     let b = new models.Book();
     b.get_book(Number(request.params.id), (err, res) => {
         if (err) {
@@ -52,7 +54,7 @@ bookApi.get('/book/:id', function (request, response) {
     });
 });
 
-bookApi.post('/book/create', jsonParser, function (request, response) {
+bookApi.post('/create', jsonParser, function (request, response) {
     if (request.body !== undefined) {
         if (request.body.length === 1) {
             let b = new models.Book();
@@ -72,7 +74,7 @@ bookApi.post('/book/create', jsonParser, function (request, response) {
     }
 });
 
-bookApi.put('/book/update/:id', jsonParser, function (request, response) {
+bookApi.put('/update/:id', jsonParser, function (request, response) {
     if (request.body !== undefined) {
         if (request.body.length === 1) {
             let b = new models.Book();
@@ -86,7 +88,7 @@ bookApi.put('/book/update/:id', jsonParser, function (request, response) {
     }
 })
 
-bookApi.delete('/book/delete/:id', (request, response) => {
+bookApi.delete('/delete/:id', (request, response) => {
     let id = request.params.id;
     if (typeof id !== "number") {
         let b = new models.Book();
@@ -98,6 +100,20 @@ bookApi.delete('/book/delete/:id', (request, response) => {
         });
     }
 });
+
+fileApi.get('/write', jsonParser, (request, response) => {
+    let data = request.body[0].body;
+    try {
+        fs.appendFileSync('testFile.txt', data + '\n');
+    } catch (err) {
+        console.log('Write file error');
+        throw err;
+    }
+    response.status(200);
+    response.set('Content-Type', 'text/json');
+    response.json('Write file success');
+});
+
 
 app.listen(3000, () => {
     console.log('Сервер слушает...')
