@@ -1,4 +1,4 @@
-const dbModule = require('./db');
+const dbModule = require('../db');
 const moment = require('moment')
 
 const db = new dbModule.DBPool();
