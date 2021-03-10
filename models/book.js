@@ -18,7 +18,7 @@ class Book {
             let sql_args = [body.title, body.author_id, body.description, moment().format(), body.image];
             db.pool.query(sql, sql_args, (err, res) => {
                 if (err) {
-                    return reject(err);
+                    reject(err);
                 } else {
                     console.log(`query [${sql}] successfully`)
                     resolve(res);
@@ -46,10 +46,10 @@ class Book {
             let sql = 'SELECT * FROM library.books WHERE id = ?';
             db.pool.query(sql, [id], (err, res) => {
                 if (err) {
-                    return reject(err);
+                    reject(err);
                 } else {
                     console.log(`query [${sql}] successfully`)
-                    return resolve(res);
+                    resolve(res);
                 }
             });
         })
