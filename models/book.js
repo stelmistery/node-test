@@ -12,43 +12,59 @@ class Book {
         this.image = image;
     }
 
-    create_book(body, callback) {
-        let sql = 'INSERT INTO library.books(title, author_id, description, date,  image) VALUES (?, ?, ?, ?, ?);';
-        let sql_args = [body.title, body.author_id, body.description, moment().format(), body.image];
-        db.pool.query(sql, sql_args, (err, res) => {
-            if (err) {
-                callback(err, null);
-            } else {
-                console.log(`query [${sql}] successfully`)
-                callback(null, res)
-            }
-        });
+    create_book(body) {
+        return new Promise((resolve, reject) => {
+            let sql = 'INSERT INTO library.books(title, author_id, description, date,  image) VALUES (?, ?, ?, ?, ?);';
+            let sql_args = [body.title, body.author_id, body.description, moment().format(), body.image];
+            db.pool.query(sql, sql_args, (err, res) => {
+                if (err) {
+                    return reject(err);
+                } else {
+                    console.log(`query [${sql}] successfully`)
+                    resolve(res);
+                }
+            });
+        })
     };
 
     get_all(callback) {
-        let sql = 'SELECT * FROM library.books';
-        db.pool.query(sql, (err, res) => {
-            if (err) {
-                callback(err, null);
-            } else {
-                console.log(`query [${sql}] successfully`)
-                callback(null, res);
-            }
-        });
+        return new Promise((resolve, reject) => {
+            let sql = 'SELECT * FROM library.books';
+            db.pool.query(sql, (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    console.log(`query [${sql}] successfully`)
+                    resolve(res);
+                }
+            });
+        })
     };
 
-    get_book(id, callback) {
-        let sql = 'SELECT * FROM library.books WHERE id = ?';
-        db.pool.query(sql, [id], (err, res) => {
-            if (err) {
-                callback(err, null);
-            } else {
-                console.log(`query [${sql}] successfully`)
-                callback(null, res);
-            }
-        });
+    get_book(id) {
+        return new Promise((resolve, reject) => {
+            let sql = 'SELECT * FROM library.books WHERE id = ?';
+            db.pool.query(sql, [id], (err, res) => {
+                if (err) {
+                    return reject(err);
+                } else {
+                    console.log(`query [${sql}] successfully`)
+                    return resolve(res);
+                }
+            });
+        })
     };
 
+    get_by_pr(body) {
+        return new Promise((resolve, reject) => {
+            this.get_by(body, (err, res) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(res);
+            })
+        })
+    }
     get_by(body, callback) {
         let argsForQuery = []
         if (body === undefined) {
@@ -111,46 +127,52 @@ class Book {
         }
     }
 
-    book_update(id, newBody, callback) {
-        let sql = 'SELECT * FROM library.books WHERE id = ?';
-        const p = new Promise((resolve, reject) => {
+    book_update(id, newBody) {
+        return new Promise((resolve, reject) => {
+
+            let sql = 'SELECT * FROM library.books WHERE id = ?';
             db.pool.query(sql, [id], (err, res) => {
                 if (err) {
-                    callback(err, null);
+                    reject(err);
                 } else {
                     console.log(`query [${sql}] successfully`);
                     resolve(res[0]);
                 }
             });
         }).then((book_data_db) => {
-            let sql = 'UPDATE library.books SET title = ?, author_id = ?, description = ?, image = ? WHERE id = ?';
-            let sqlArgs = [];
-            let title = (newBody.title) ? newBody.title : book_data_db.title;
-            let author_id = (newBody.author_id) ? newBody.author_id : book_data_db.author_id;
-            let description = (newBody.description) ? newBody.description : book_data_db.description;
-            let image = (newBody.image) ? newBody.image : book_data_db.image;
-            sqlArgs.push(title, author_id, description, image, id);
-            db.pool.query(sql, sqlArgs, (err, res) => {
-                if (err) {
-                    callback(err, null);
-                } else {
-                    console.log(`query [${sql}] successfully`);
-                    callback(null, res);
-                }
-            });
+            return new Promise((resolve, reject) => {
+
+                let sql = 'UPDATE library.books SET title = ?, author_id = ?, description = ?, image = ? WHERE id = ?';
+                let sqlArgs = [];
+                let title = (newBody.title) ? newBody.title : book_data_db.title;
+                let author_id = (newBody.author_id) ? newBody.author_id : book_data_db.author_id;
+                let description = (newBody.description) ? newBody.description : book_data_db.description;
+                let image = (newBody.image) ? newBody.image : book_data_db.image;
+                sqlArgs.push(title, author_id, description, image, id);
+                db.pool.query(sql, sqlArgs, (err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        console.log(`query [${sql}] successfully`);
+                        resolve(res);
+                    }
+                });
+            })
         });
     }
 
-    book_delete(id, callback) {
-        let sql = 'DELETE FROM library.books WHERE id = ?';
-        db.pool.query(sql, [id], (err, res) => {
-            if (err) {
-                callback(err, null);
-            } else {
-                console.log(`query [${sql}] successfully`);
-                callback(null, res);
-            }
-        });
+    book_delete(id) {
+        return new Promise((resolve, reject) => {
+            let sql = 'DELETE FROM library.books WHERE id = ?';
+            db.pool.query(sql, [id], (err, res) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    console.log(`query [${sql}] successfully`);
+                    resolve(res);
+                }
+            });
+        })
     }
 }
 
